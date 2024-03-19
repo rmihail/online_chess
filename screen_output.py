@@ -10,6 +10,9 @@ timer = pygame.time.Clock()
 fps = 120
 board = chess.Board()
 
+font1 = pygame.font.Font(None, 40)
+board_text = font1.render(str(board), 1, (180, 180, 180))
+
 run = True
 while run is True:
     timer.tick(fps)
@@ -18,7 +21,7 @@ while run is True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
-    print(board)
+    screen.blit(board_text, (10, 50))
 
     pygame.display.flip()
 pygame.quit()
