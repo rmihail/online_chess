@@ -12,11 +12,12 @@ timer = pygame.time.Clock()
 board = chess.Board()
 
 font1 = pygame.font.Font(None, 40)
+BLACK_SQUARE_COLOR = (160, 160, 160)
+WHITE_SQUARE_COLOR = (255, 255, 255)
 
 
 def print_pieces(screen_, piece_image_map):
     for square in chess.SQUARES:
-        # проверка, есть ли в клетке фигура
         piece = board.piece_at(square)
         if piece is None:
             pass
@@ -26,13 +27,33 @@ def print_pieces(screen_, piece_image_map):
             screen_.blit(piece_image_map[str(piece)], (horizontal*100, 700 - vertical*100))
 
 
+def print_board():
+    for square in chess.SQUARES:
+        vertical_is_even = True if square // 8 % 2 == 0 else False
+        if vertical_is_even is True:
+            if square % 2 == 0:
+                square_color = BLACK_SQUARE_COLOR
+            else:
+                square_color = WHITE_SQUARE_COLOR
+        else:
+            if square % 2 == 0:
+                square_color = WHITE_SQUARE_COLOR
+            else:
+                square_color = BLACK_SQUARE_COLOR
+        pygame.draw.rect(screen, square_color, squares_rects[square])
+
+
+squares_rects = {}
+for square in chess.SQUARES:
+    squares_rects[square] = pygame.Rect(square % 8*100, 700 - square // 8*100, 100, 100)
+
 run = True
 while run is True:
     timer.tick(FRAMES_PER_SECOND)
     screen.fill('dark gray')
 
     # рисование доски
-    screen.blit(board_image, (0, 0))
+    print_board()
 
     # display chess pieces on the screen
     print_pieces(screen, PIECE_IMAGE_MAP)
