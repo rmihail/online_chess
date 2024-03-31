@@ -52,7 +52,7 @@ while run is True:
     timer.tick(FRAMES_PER_SECOND)
     screen.fill('dark gray')
 
-    # рисование доски
+    # board printing
     print_board()
 
     # display chess pieces on the screen
@@ -61,5 +61,15 @@ while run is True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
+
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                targeted_square = event.pos[0] // 100 + (7 - event.pos[1] // 100)*8
+
+        elif event.type == pygame.MOUSEBUTTONUP:
+            if event.button == 1:
+                released_at = event.pos[0] // 100 + (7 - event.pos[1] // 100)*8
+                board.push(chess.Move(targeted_square, released_at))
+
     pygame.display.flip()
 pygame.quit()
