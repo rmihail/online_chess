@@ -1,7 +1,6 @@
 """
 File containing settings constants
 """
-import chess
 import pygame
 
 # screen size
@@ -23,7 +22,6 @@ PIECE_IMAGE_MAP = {'p': pygame.image.load('images/black_pawn.png'),
                    'K': pygame.image.load('images/white_king.png'),
                    }
 
-board_image = pygame.image.load('images/board.png')
 # scale images
 for symbol, piece_image in zip(PIECE_IMAGE_MAP.keys(), PIECE_IMAGE_MAP.values()):
     PIECE_IMAGE_MAP[symbol] = pygame.transform.scale(piece_image, (100, 100))
@@ -32,3 +30,6 @@ for symbol, piece_image in zip(PIECE_IMAGE_MAP.keys(), PIECE_IMAGE_MAP.values())
 # COORDINATES = {}
 # for square in chess.SQUARES:
 #     COORDINATES[square] =
+
+BLACK_SQUARE_COLOR = (120, 160, 160)
+WHITE_SQUARE_COLOR = (240, 255, 255)
