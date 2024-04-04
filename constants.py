@@ -33,3 +33,4 @@ for symbol, piece_image in zip(PIECE_IMAGE_MAP.keys(), PIECE_IMAGE_MAP.values())
 
 BLACK_SQUARE_COLOR = (120, 160, 160)
 WHITE_SQUARE_COLOR = (240, 255, 255)
+POSSIBLE_MOVE_COLOR = (10, 255, 100)
