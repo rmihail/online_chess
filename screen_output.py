@@ -32,15 +32,24 @@ def print_board(screen_, piece_image_map):
                 ))
 
 
-def print_promotion_menu(screen_, to_square):
+def print_promotion_menu(screen_, from_square, to_square):
     menu_side = 0 if to_square < 60 else 1
+    menu_click_checklist = []
     for square, piece in zip((to_square - 2, to_square - 1, to_square - 9, to_square - 10)
                              if menu_side == 0 else (to_square + 1, to_square + 2, to_square - 6, to_square - 7),
-                             ('Q', 'R', 'B', 'N')):
-        menu_square_coordinates = (chess.square_rank(square) * 100, -(chess.square_file(square) * 100), 100, 100)
+                             (chess.QUEEN, chess.ROOK, chess.BISHOP, chess.KNIGHT)):
+        menu_square_coordinates = (chess.square_rank(square) * 100, -(chess.square_file(square) * 100), piece)
+        menu_click_checklist.append((menu_square_coordinates[0], menu_square_coordinates[1]))
         menu_rectangle = pygame.Rect(menu_square_coordinates[0], menu_square_coordinates[1], 100, 100)
         pygame.draw.rect(screen_, PROMOTION_MENU_COLOR, menu_rectangle)
         screen_.blit(PIECE_IMAGE_MAP[piece], (menu_square_coordinates[0], menu_square_coordinates[1]))
+
+    while event.type != pygame.MOUSEBUTTONDOWN:
+        if event.button == 1:
+            for menu_square_x, menu_square_y, menu_piece in menu_click_checklist:
+                if menu_square_x < event.pos[0] < menu_square_x + 100 and \
+                        menu_square_y > event.pos[1] > menu_square_y + 100:
+                    board.push(chess.Move(from_square, to_square, promotion=menu_piece))
 
 
 choosing_promotion = True
