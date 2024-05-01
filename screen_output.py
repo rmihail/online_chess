@@ -32,57 +32,59 @@ def print_board(screen_, piece_image_map):
                 ))
 
 
-def print_promotion_menu(screen_, from_square, to_square):
-    menu_side = 0 if to_square < 60 else 1
-    menu_click_checklist = []
-    for square, piece in zip((to_square - 2, to_square - 1, to_square - 9, to_square - 10)
-                             if menu_side == 0 else (to_square + 1, to_square + 2, to_square - 6, to_square - 7),
-                             (chess.QUEEN, chess.ROOK, chess.BISHOP, chess.KNIGHT)):
-        menu_square_coordinates = (chess.square_rank(square) * 100, -(chess.square_file(square) * 100), piece)
-        menu_click_checklist.append((menu_square_coordinates[0], menu_square_coordinates[1]))
-        menu_rectangle = pygame.Rect(menu_square_coordinates[0], menu_square_coordinates[1], 100, 100)
-        pygame.draw.rect(screen_, PROMOTION_MENU_COLOR, menu_rectangle)
-        screen_.blit(PIECE_IMAGE_MAP[piece], (menu_square_coordinates[0], menu_square_coordinates[1]))
+def print_promotion_menu(screen_, to_square):
+    file_index = chess.square_file(to_square)
+    rank_index = chess.square_rank(to_square)
+    for piece_type in (chess.QUEEN, chess.ROOK, chess.BISHOP, chess.KNIGHT):
+        rank_index -= 1
 
-    while event.type != pygame.MOUSEBUTTONDOWN:
-        if event.button == 1:
-            for menu_square_x, menu_square_y, menu_piece in menu_click_checklist:
-                if menu_square_x < event.pos[0] < menu_square_x + 100 and \
-                        menu_square_y > event.pos[1] > menu_square_y + 100:
-                    board.push(chess.Move(from_square, to_square, promotion=menu_piece))
+        rect = pygame.Rect(file_index * 100, 700 - rank_index * 100, 100, 100)
+        pygame.draw.rect(screen, PROMOTION_MENU_COLOR, rect)
+
+        piece = chess.Piece(piece_type, board.turn)
+        screen_.blit(PIECE_IMAGE_MAP[piece.symbol()], rect)
+
+        choosing_promotion[ chess.square(file_index, rank_index)] = piece_type
 
 
-choosing_promotion = True
+choosing_promotion = {}
+released_at = None
 targeted_piece = None
 targeted_square = None
 choosing_move = False
 run = True
 while run is True:
     timer.tick(FRAMES_PER_SECOND)
-    screen.fill('dark gray')
+    # screen.fill('dark gray')
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:
+            if event.button == 1 and not choosing_promotion:
                 targeted_square = event.pos[0] // 100 + (7 - event.pos[1] // 100) * 8
                 choosing_move = True
                 targeted_piece = board.piece_at(targeted_square)
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:
-                released_at = event.pos[0] // 100 + (7 - event.pos[1] // 100) * 8
-                move = chess.Move(targeted_square, released_at)
-                # if chess.square_rank(move.to_square) in (0, 7) and board.piece_at(move.to_square).symbol() == "P":
-                #     choosing_promotion = True
-                if move in board.legal_moves:
-                    board.push(chess.Move(targeted_square, released_at))
-            choosing_move = False
-            targeted_square = None
+                released_at_ = event.pos[0] // 100 + (7 - event.pos[1] // 100) * 8
+                promotion = None
+                if chess.square_rank(released_at_) in (0, 7) and board.piece_at(targeted_square).symbol() in ('P', 'p'):
+                    print_promotion_menu(screen, released_at_)
+                    released_at = released_at_
+                else:
+                    if promotion:=choosing_promotion.get(released_at_):
+                        choosing_promotion = {}
+                    move = chess.Move(targeted_square, released_at or released_at_, promotion=promotion)
+                    if move in board.legal_moves:
+                        board.push(move)
+                    choosing_move = False
+                    targeted_square = None
+                    released_at = None
 
-        print_promotion_menu(screen, 60)
     # board printing
-    print_board(screen, PIECE_IMAGE_MAP)
+    if not choosing_promotion:
+        print_board(screen, PIECE_IMAGE_MAP)
 
     pygame.display.flip()
 pygame.quit()
