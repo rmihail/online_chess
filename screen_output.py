@@ -1,5 +1,6 @@
 import pygame
 import chess
+
 from constants import *
 
 pygame.init()
@@ -34,7 +35,7 @@ def print_board(screen_, piece_image_map):
 
 def print_promotion_menu(screen_, to_square):
     file_index = chess.square_file(to_square)
-    rank_index = chess.square_rank(to_square)
+    rank_index = chess.square_rank(to_square) + 1
     for piece_type in (chess.QUEEN, chess.ROOK, chess.BISHOP, chess.KNIGHT):
         rank_index -= 1
 
@@ -44,7 +45,7 @@ def print_promotion_menu(screen_, to_square):
         piece = chess.Piece(piece_type, board.turn)
         screen_.blit(PIECE_IMAGE_MAP[piece.symbol()], rect)
 
-        choosing_promotion[ chess.square(file_index, rank_index)] = piece_type
+        choosing_promotion[chess.square(file_index, rank_index)] = piece_type
 
 
 choosing_promotion = {}
@@ -68,12 +69,19 @@ while run is True:
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:
                 released_at_ = event.pos[0] // 100 + (7 - event.pos[1] // 100) * 8
-                promotion = None
-                if chess.square_rank(released_at_) in (0, 7) and board.piece_at(targeted_square).symbol() in ('P', 'p'):
+                promotion = choosing_promotion.get(released_at_)
+                if choosing_promotion and not promotion:
+                    choosing_promotion = {}
+                    targeted_piece = None
+                    targeted_square = None
+                    continue
+                if not choosing_promotion and chess.square_rank(released_at_) in (0, 7) and board.piece_at(targeted_square) is not None \
+                        and board.piece_at(targeted_square).symbol() in ('P', 'p') \
+                        and chess.Move(targeted_square, released_at_, promotion=chess.QUEEN) in board.legal_moves:  # проверка на возможность хода в эту клетку с превращением
                     print_promotion_menu(screen, released_at_)
                     released_at = released_at_
                 else:
-                    if promotion:=choosing_promotion.get(released_at_):
+                    if promotion := choosing_promotion.get(released_at_):
                         choosing_promotion = {}
                     move = chess.Move(targeted_square, released_at or released_at_, promotion=promotion)
                     if move in board.legal_moves:
@@ -81,6 +89,7 @@ while run is True:
                     choosing_move = False
                     targeted_square = None
                     released_at = None
+                    choosing_promotion = {}
 
     # board printing
     if not choosing_promotion:
