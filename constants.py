@@ -22,16 +22,30 @@ PIECE_IMAGE_MAP = {'p': pygame.image.load('images/black_pawn.png'),
                    'K': pygame.image.load('images/white_king.png'),
                    }
 
+STOCKFISH_PARAMETERS = {
+    "Debug Log File": "",
+    "Contempt": 0,
+    "Min Split Depth": 0,
+    "Threads": 1,
+    "Ponder": "false",
+    "Hash": 16,
+    "MultiPV": 1,
+    "Skill Level": 20,
+    "Move Overhead": 10,
+    "Minimum Thinking Time": 20,
+    "Slow Mover": 100,
+    "UCI_Chess960": "false",
+    "UCI_LimitStrength": "false",
+    "UCI_Elo": 1350
+}
+
 # scale images
 for symbol, piece_image in zip(PIECE_IMAGE_MAP.keys(), PIECE_IMAGE_MAP.values()):
     PIECE_IMAGE_MAP[symbol] = pygame.transform.scale(piece_image, (100, 100))
 
-# generate coordinates dictionary
-# COORDINATES = {}
-# for square in chess.SQUARES:
-#     COORDINATES[square] =
 
 BLACK_SQUARE_COLOR = (120, 160, 160)
 WHITE_SQUARE_COLOR = (240, 255, 255)
 POSSIBLE_MOVE_COLOR = (10, 255, 100)
 PROMOTION_MENU_COLOR = (160, 210, 210)
+CHECKED_KING_COLOR = (222, 17, 58)

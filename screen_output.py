@@ -3,22 +3,7 @@ import chess
 from stockfish import Stockfish
 from constants import *
 
-STOCKFISH_PARAMETERS = {
-    "Debug Log File": "",
-    "Contempt": 0,
-    "Min Split Depth": 0,
-    "Threads": 1,
-    "Ponder": "false",
-    "Hash": 16,
-    "MultiPV": 1,
-    "Skill Level": 20,
-    "Move Overhead": 10,
-    "Minimum Thinking Time": 20,
-    "Slow Mover": 100,
-    "UCI_Chess960": "false",
-    "UCI_LimitStrength": "false",
-    "UCI_Elo": 1350
-}
+
 stockfish = Stockfish(path="C:/Users/User/PycharmProjects/online_chess/stockfish/stockfish-windows-x86-64-avx2.exe",
                       depth=18, parameters=STOCKFISH_PARAMETERS)
 pygame.init()
@@ -26,10 +11,11 @@ pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 timer = pygame.time.Clock()
 
-board = chess.Board()
+board = chess.Board(fen='rnbqkb1r/p1pp1ppp/4pn2/2p5/Q2P4/8/PP2PPPP/RNB1KBNR w KQkq - 0 5')
 
 
 def print_board(screen_, piece_image_map):
+    color_checked = None
     for square in chess.SQUARES:
         square_color = BLACK_SQUARE_COLOR if (square % 8 + square // 8) % 2 == 0 else WHITE_SQUARE_COLOR
         file_index = chess.square_file(square)
@@ -37,8 +23,12 @@ def print_board(screen_, piece_image_map):
         rect = pygame.Rect(file_index * 100, 700 - rank_index * 100, 100, 100)
         pygame.draw.rect(screen, square_color, rect)
         piece = board.piece_at(square)
+        if board.is_check():
+            color_checked = False if board.turn == chess.BLACK else True
         if piece is not None and square != targeted_square:
             screen_.blit(piece_image_map[str(piece)], rect)
+            if board.is_check() and piece.symbol() in ('K', 'k') and piece.color == color_checked:
+                pygame.draw.rect(screen, CHECKED_KING_COLOR, (rect.x, rect.y, 100, 100), 3)
         if choosing_move:
             for legal_move in board.legal_moves:
                 if legal_move.from_square == targeted_square:
@@ -75,7 +65,6 @@ run = True
 while run is True:
     timer.tick(FRAMES_PER_SECOND)
     # screen.fill('dark gray')
-
     if board.turn is False:  # True - white to move
         stockfish.set_fen_position(board.fen())
         board.push(chess.Move.from_uci(stockfish.get_best_move()))
