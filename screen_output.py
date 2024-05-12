@@ -1,14 +1,32 @@
 import pygame
 import chess
-
+from stockfish import Stockfish
 from constants import *
 
+STOCKFISH_PARAMETERS = {
+    "Debug Log File": "",
+    "Contempt": 0,
+    "Min Split Depth": 0,
+    "Threads": 1,
+    "Ponder": "false",
+    "Hash": 16,
+    "MultiPV": 1,
+    "Skill Level": 20,
+    "Move Overhead": 10,
+    "Minimum Thinking Time": 20,
+    "Slow Mover": 100,
+    "UCI_Chess960": "false",
+    "UCI_LimitStrength": "false",
+    "UCI_Elo": 1350
+}
+stockfish = Stockfish(path="C:/Users/User/PycharmProjects/online_chess/stockfish/stockfish-windows-x86-64-avx2.exe",
+                      depth=18, parameters=STOCKFISH_PARAMETERS)
 pygame.init()
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 timer = pygame.time.Clock()
 
-board = chess.Board('rn1qkbnr/ppP1pppp/8/8/2p3b1/8/PP2PPPP/RNBQKBNR w KQkq - 1 6')
+board = chess.Board()
 
 
 def print_board(screen_, piece_image_map):
@@ -58,6 +76,9 @@ while run is True:
     timer.tick(FRAMES_PER_SECOND)
     # screen.fill('dark gray')
 
+    if board.turn is False:  # True - white to move
+        stockfish.set_fen_position(board.fen())
+        board.push(chess.Move.from_uci(stockfish.get_best_move()))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
@@ -69,8 +90,13 @@ while run is True:
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:
                 released_at_ = event.pos[0] // 100 + (7 - event.pos[1] // 100) * 8
-                promotion = None
-                if chess.square_rank(released_at_) in (0, 7) and board.piece_at(targeted_square) is not None \
+                promotion = choosing_promotion.get(released_at_)
+                if choosing_promotion and not promotion:
+                    choosing_promotion = {}
+                    targeted_piece = None
+                    targeted_square = None
+                    continue
+                if not choosing_promotion and chess.square_rank(released_at_) in (0, 7) and board.piece_at(targeted_square) is not None \
                         and board.piece_at(targeted_square).symbol() in ('P', 'p') \
                         and chess.Move(targeted_square, released_at_, promotion=chess.QUEEN) in board.legal_moves:  # проверка на возможность хода в эту клетку с превращением
                     print_promotion_menu(screen, released_at_)
@@ -84,6 +110,7 @@ while run is True:
                     choosing_move = False
                     targeted_square = None
                     released_at = None
+                    choosing_promotion = {}
 
     # board printing
     if not choosing_promotion:
