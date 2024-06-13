@@ -1,4 +1,9 @@
-`pip install -requirements.txt`
+`pip install -r requirements.txt`
+
+### Downloading StockFish
+
+- Go to https://stockfishchess.org/download/ and get stockfish 16.1
+- In `settings.py`, define your stockfish path in constant `STOCKFISH_PATH`
 
 ### Instruction for launching
 

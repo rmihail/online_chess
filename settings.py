@@ -22,6 +22,7 @@ PIECE_IMAGE_MAP = {'p': pygame.image.load('images/black_pawn.png'),
                    'K': pygame.image.load('images/white_king.png'),
                    }
 
+STOCKFISH_PATH = ""  # enter your path here
 STOCKFISH_PARAMETERS = {
     "Debug Log File": "",
     "Contempt": 0,

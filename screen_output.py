@@ -1,17 +1,17 @@
 import pygame
 import chess
 from stockfish import Stockfish
-from constants import *
+from settings import *
 
 
-stockfish = Stockfish(path="C:/Users/User/PycharmProjects/online_chess/stockfish/stockfish-windows-x86-64-avx2.exe",
+stockfish = Stockfish(path=STOCKFISH_PATH,
                       depth=18, parameters=STOCKFISH_PARAMETERS)
 pygame.init()
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 timer = pygame.time.Clock()
 
-board = chess.Board(fen='rnbqkb1r/p1pp1ppp/4pn2/2p5/Q2P4/8/PP2PPPP/RNB1KBNR w KQkq - 0 5')
+board = chess.Board()
 
 
 def print_board(screen_, piece_image_map):
