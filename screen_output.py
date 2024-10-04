@@ -13,6 +13,8 @@ timer = pygame.time.Clock()
 
 board = chess.Board()
 
+font = pygame.font.SysFont('Arial', 36)
+
 
 def print_board(screen_, piece_image_map):
     color_checked = None
@@ -56,15 +58,46 @@ def print_promotion_menu(screen_, to_square):
         choosing_promotion[chess.square(file_index, rank_index)] = piece_type
 
 
+def print_game_ending():
+    if board.result() == '0-1':
+        ending_text = 'You lost'
+    if board.result() == '1-0':
+        ending_text = 'You won'
+    else:
+        ending_text = 'Draw'
+
+    darkening = pygame.Surface((WIDTH, HEIGHT))
+    darkening.fill((0, 0, 0))
+    darkening.set_alpha(128)
+    screen.blit(darkening, (0, 0))
+    menu_rect = pygame.Rect((WIDTH - 300)//2, (HEIGHT - 200)//2, 300, 200)
+    pygame.draw.rect(screen, WHITE_SQUARE_COLOR, menu_rect)
+    text_surface = font.render(ending_text, True, (0, 0, 0))
+    text_rect = text_surface.get_rect()
+    text_rect.center = (menu_rect.x + menu_rect.width // 2, menu_rect.y + menu_rect.height // 2)
+    screen.blit(text_surface, text_rect)
+
+
 choosing_promotion = {}
 released_at = None
 targeted_piece = None
 targeted_square = None
 choosing_move = False
+game_over = False
 run = True
 while run is True:
     timer.tick(FRAMES_PER_SECOND)
-    # screen.fill('dark gray')
+    if board.is_game_over():
+        if game_over is False:
+            print_game_ending()
+            game_over = True
+        pygame.display.flip()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                run = False
+        continue
     if board.turn is False:  # True - white to move
         stockfish.set_fen_position(board.fen())
         board.push(chess.Move.from_uci(stockfish.get_best_move()))
@@ -104,6 +137,7 @@ while run is True:
     # board printing
     if not choosing_promotion:
         print_board(screen, PIECE_IMAGE_MAP)
+
 
     pygame.display.flip()
 pygame.quit()

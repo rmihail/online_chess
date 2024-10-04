@@ -22,7 +22,7 @@ PIECE_IMAGE_MAP = {'p': pygame.image.load('images/black_pawn.png'),
                    'K': pygame.image.load('images/white_king.png'),
                    }
 
-STOCKFISH_PATH = ""  # enter your path here
+STOCKFISH_PATH = r"C:\Users\User\essentials\stockfish\stockfish-windows-x86-64-avx2.exe"  # enter your path here
 STOCKFISH_PARAMETERS = {
     "Debug Log File": "",
     "Contempt": 0,
