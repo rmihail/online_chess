@@ -13,7 +13,7 @@ timer = pygame.time.Clock()
 
 board = chess.Board()
 
-font = pygame.font.SysFont('Arial', 36)
+font = pygame.font.SysFont('Verdana', 36)
 
 
 def print_board(screen_, piece_image_map):
@@ -59,9 +59,10 @@ def print_promotion_menu(screen_, to_square):
 
 
 def print_game_ending():
+    print(board.result())
     if board.result() == '0-1':
         ending_text = 'You lost'
-    if board.result() == '1-0':
+    elif board.result() == '1-0':
         ending_text = 'You won'
     else:
         ending_text = 'Draw'
@@ -72,10 +73,17 @@ def print_game_ending():
     screen.blit(darkening, (0, 0))
     menu_rect = pygame.Rect((WIDTH - 300)//2, (HEIGHT - 200)//2, 300, 200)
     pygame.draw.rect(screen, WHITE_SQUARE_COLOR, menu_rect)
-    text_surface = font.render(ending_text, True, (0, 0, 0))
-    text_rect = text_surface.get_rect()
-    text_rect.center = (menu_rect.x + menu_rect.width // 2, menu_rect.y + menu_rect.height // 2)
-    screen.blit(text_surface, text_rect)
+    result_text_surface = font.render(ending_text, True, (0, 0, 0))
+    result_text_rect = result_text_surface.get_rect()
+    result_text_rect.center = (menu_rect.x + menu_rect.width // 2, (menu_rect.y + menu_rect.height // 2) - 50)
+    global quit_rect
+    quit_rect = pygame.Rect(menu_rect.centerx - 100, menu_rect.centery, 200, 50)
+    quit_text_surface = font.render('Quit', True, (0, 0, 0))
+    quit_text_rect = quit_text_surface.get_rect()
+    quit_text_rect.center = (quit_rect.centerx, quit_rect.centery)
+    pygame.draw.rect(screen, BLACK_SQUARE_COLOR, quit_rect)
+    screen.blit(result_text_surface, result_text_rect)
+    screen.blit(quit_text_surface, quit_text_rect)
 
 
 choosing_promotion = {}
@@ -95,7 +103,7 @@ while run is True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-            elif event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN and quit_rect.collidepoint(event.pos):
                 run = False
         continue
     if board.turn is False:  # True - white to move
