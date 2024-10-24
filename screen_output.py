@@ -11,13 +11,14 @@ pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 timer = pygame.time.Clock()
 
-board = chess.Board()
+board = chess.Board('rn1qkbnr/ppP1pppp/8/8/2p3b1/8/PP2PPPP/RNBQKBNR w KQkq - 1 6')
 
 font = pygame.font.SysFont('Verdana', 36)
 
 
 def print_board(screen_, piece_image_map):
     color_checked = None
+
     for square in chess.SQUARES:
         square_color = BLACK_SQUARE_COLOR if (square % 8 + square // 8) % 2 == 0 else WHITE_SQUARE_COLOR
         file_index = chess.square_file(square)
@@ -25,12 +26,14 @@ def print_board(screen_, piece_image_map):
         rect = pygame.Rect(file_index * 100, 700 - rank_index * 100, 100, 100)
         pygame.draw.rect(screen, square_color, rect)
         piece = board.piece_at(square)
+
         if board.is_check():
             color_checked = False if board.turn == chess.BLACK else True
         if piece is not None and square != targeted_square:
             screen_.blit(piece_image_map[str(piece)], rect)
             if board.is_check() and piece.symbol() in ('K', 'k') and piece.color == color_checked:
                 pygame.draw.rect(screen, CHECKED_KING_COLOR, (rect.x, rect.y, 100, 100), 3)
+
         if choosing_move:
             for legal_move in board.legal_moves:
                 if legal_move.from_square == targeted_square:
@@ -59,14 +62,12 @@ def print_promotion_menu(screen_, to_square):
 
 
 def print_game_ending():
-    print(board.result())
     if board.result() == '0-1':
         ending_text = 'You lost'
     elif board.result() == '1-0':
         ending_text = 'You won'
     else:
         ending_text = 'Draw'
-
     darkening = pygame.Surface((WIDTH, HEIGHT))
     darkening.fill((0, 0, 0))
     darkening.set_alpha(128)
@@ -81,7 +82,8 @@ def print_game_ending():
     quit_text_surface = font.render('Quit', True, (0, 0, 0))
     quit_text_rect = quit_text_surface.get_rect()
     quit_text_rect.center = (quit_rect.centerx, quit_rect.centery)
-    pygame.draw.rect(screen, BLACK_SQUARE_COLOR, quit_rect)
+    pygame.draw.rect(screen, BLACK_SQUARE_COLOR if not quit_rect.collidepoint(pygame.mouse.get_pos()) else (108, 144, 144), quit_rect)
+    print(quit_rect.collidepoint(pygame.mouse.get_pos()))
     screen.blit(result_text_surface, result_text_rect)
     screen.blit(quit_text_surface, quit_text_rect)
 
@@ -91,14 +93,14 @@ released_at = None
 targeted_piece = None
 targeted_square = None
 choosing_move = False
-game_over = False
+menu_printed = False
 run = True
 while run is True:
     timer.tick(FRAMES_PER_SECOND)
     if board.is_game_over():
-        if game_over is False:
+        if menu_printed is False:
             print_game_ending()
-            game_over = True
+            menu_printed = True
         pygame.display.flip()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -129,6 +131,10 @@ while run is True:
                 if not choosing_promotion and chess.square_rank(released_at_) in (0, 7) and board.piece_at(targeted_square) is not None \
                         and board.piece_at(targeted_square).symbol() in ('P', 'p') \
                         and chess.Move(targeted_square, released_at_, promotion=chess.QUEEN) in board.legal_moves:  # проверка на возможность хода в эту клетку с превращением
+                    darkening = pygame.Surface((WIDTH, HEIGHT))
+                    darkening.fill((0, 0, 0))
+                    darkening.set_alpha(128)
+                    screen.blit(darkening, (0, 0))
                     print_promotion_menu(screen, released_at_)
                     released_at = released_at_
                 else:
@@ -145,7 +151,6 @@ while run is True:
     # board printing
     if not choosing_promotion:
         print_board(screen, PIECE_IMAGE_MAP)
-
 
     pygame.display.flip()
 pygame.quit()
